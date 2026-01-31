@@ -52,18 +52,18 @@ graph LR
     end
 
     subgraph "API Gateway / Services"
-        Admin Service[Admin Service (Express.js)]
-        Core Service[Core Service (Golang)]
+        AdminService[Admin Service Express.js]
+        CoreService[Core Service Golang]
     end
 
     subgraph "Data Persistence"
         DB[(MySQL Database)]
     end
 
-    FE -->|Management & Config| Admin Service
-    Mobile -->|Attendance & Request| Core Service
-    Admin Service --> DB
-    Core Service --> DB
+    FE -->|Management & Config| AdminService
+    Mobile -->|Attendance & Request| CoreService
+    AdminService --> DB
+    CoreService --> DB
 ```
 
 ---
