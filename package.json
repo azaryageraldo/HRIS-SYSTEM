@@ -1,0 +1,17 @@
+{
+  "name": "hris-system",
+  "version": "1.0.0",
+  "description": "HRIS System - IT Employee Management",
+  "scripts": {
+    "start": "bash start.sh",
+    "stop": "bash stop.sh",
+    "dev": "bash start.sh",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:rebuild": "docker-compose up -d --build"
+  },
+  "keywords": ["hris", "microservices", "express", "golang", "react"],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,111 @@
+version: "3.8"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: hris-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - hris-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Express API (Panel Admin)
+  api-express:
+    build:
+      context: ./api-express
+      dockerfile: Dockerfile.dev
+    container_name: hris-api-express
+    restart: unless-stopped
+    ports:
+      - "${EXPRESS_PORT}:5000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - PORT=5000
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    volumes:
+      - ./api-express/src:/app/src
+      - ./api-express/package.json:/app/package.json
+      - ./api-express/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - hris-network
+    command: npm run dev
+
+  # Golang API (Panel HR, Keuangan, Karyawan)
+  api-golang:
+    build:
+      context: ./api-golang
+      dockerfile: Dockerfile
+    container_name: hris-api-golang
+    restart: unless-stopped
+    ports:
+      - "${GOLANG_PORT}:8080"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - PORT=8080
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    volumes:
+      - ./api-golang:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - hris-network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hris-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_EXPRESS_URL=http://localhost:${EXPRESS_PORT}
+      - VITE_API_GOLANG_URL=http://localhost:${GOLANG_PORT}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api-express
+      - api-golang
+    networks:
+      - hris-network
+    stdin_open: true
+    tty: true
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  hris-network:
+    driver: bridge
