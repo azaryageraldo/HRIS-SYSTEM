@@ -1,292 +1,128 @@
 # HRIS System - IT Employee Management System
 
-Sistem HRIS berbasis microservices untuk mengelola karyawan IT dengan presensi GPS, penggajian otomatis, dan role-based access control.
+Sistem HRIS (Human Resource Information System) berbasis microservices yang dirancang khusus untuk perusahaan IT. Sistem ini memudahkan pengelolaan karyawan, presensi berbasis lokasi (GPS), manajemen cuti, dan penggajian otomatis dengan kontrol akses berbasis peran (RBAC).
 
-## 🏗️ Arsitektur
+## 🚀 Fitur Utama
 
-```
-Frontend (React + MUI)
-├── API Express (Panel Admin) - Port 5000
-│   ├── Manajemen Divisi IT
-│   ├── Konfigurasi Gaji, Cuti, Presensi
-│   └── Manajemen User & Role
-│
-└── API Golang (Panel HR, Keuangan, Karyawan) - Port 8080
-    ├── Presensi & Validasi GPS
-    ├── Izin & Cuti
-    ├── Payroll Calculation
-    ├── Pembayaran Gaji
-    └── Slip Gaji & Laporan
+### 1. Panel Admin (Express.js + React)
 
-→ MySQL Database - Port 3306
-```
+Pusat kontrol untuk administrator sistem.
 
-## 📋 Prerequisites
+- **Dashboard Interaktif**: Ringkasan statistik karyawan dan status sistem.
+- **Manajemen Divisi**: Pengelolaan struktur organisasi perusahaan (IT, HR, Finance, dll).
+- **Manajemen User & Role**:
+  - CRUD Pengguna dengan enkripsi password.
+  - Assign Role (Admin, HR, Keuangan, Karyawan).
+  - Aktivasi/Deaktivasi akun.
+- **Konfigurasi Sistem**:
+  - **Gaji**: Set gaji pokok per divisi dan aturan potongan (terlambat, absen).
+  - **Cuti**: Set kuota cuti tahunan per divisi.
+  - **Presensi**: Set lokasi kantor (Latitude/Longitude), radius presensi (meter), dan jam kerja operasional.
 
-- Docker & Docker Compose
-- Node.js 20+ (untuk development lokal)
-- Go 1.21+ (untuk development lokal)
+### 2. Panel HR (Golang)
 
-## 🚀 Quick Start
+- Monitoring Real-time Presensi Karyawan.
+- Persetujuan/Penolakan Izin & Cuti.
+- Perhitungan Payroll Otomatis (Gaji Pokok - Potongan + Tunjangan).
 
-### 1. Clone dan Setup Environment
+### 3. Panel Keuangan (Golang)
 
-```bash
-cd HRIS-SYSTEM
-cp .env.example .env  # Edit sesuai kebutuhan
-```
+- Eksekusi Pembayaran Gaji.
+- Laporan Keuangan & Pengeluaran Gaji.
 
-### 2. Jalankan Semua Service dengan Docker Compose
+### 4. Panel Karyawan (Mobile/Web)
 
-```bash
-# Build dan start semua service
-docker-compose up --build
+- **Presensi GPS**: Clock-in/Clock-out hanya bisa dilakukan dalam radius kantor yang ditentukan.
+- **Self Service**: Pengajuan cuti, lihat slip gaji, dan riwayat kehadiran.
 
-# Atau jalankan di background
-docker-compose up -d --build
-```
+## 🏗️ Arsitektur Sistem
 
-### 3. Akses Aplikasi
+Sistem dibangun dengan arsitektur **Microservices** dan **Monorepo**:
 
-- **Frontend**: http://localhost:3000
-- **Express API**: http://localhost:5000
-- **Golang API**: http://localhost:8080
-- **MySQL**: localhost:3306
+```mermaid
+graph TD
+    Client[Frontend (React + MUI)] -->|Port 5000| API_Admin[API Express (Admin)]
+    Client -->|Port 8080| API_Core[API Golang (HR, Finance, Employee)]
 
-### 4. Health Check
-
-```bash
-# Check Express API
-curl http://localhost:5000/health
-
-# Check Golang API
-curl http://localhost:8080/health
+    subgraph Data Layer
+        API_Admin --> DB[(MySQL Database)]
+        API_Core --> DB
+    end
 ```
 
-## 📁 Struktur Project
+## 🛠️ Teknologi yang Digunakan
 
-```
-HRIS-SYSTEM/
-├── frontend/                 # React + Vite + MUI
-│   ├── src/
-│   ├── Dockerfile
-│   └── package.json
-│
-├── api-express/             # Express.js (Panel Admin)
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   └── server.js
-│   ├── Dockerfile
-│   └── package.json
-│
-├── api-golang/              # Golang (Panel HR, Keuangan, Karyawan)
-│   ├── cmd/
-│   │   └── main.go
-│   ├── internal/
-│   │   ├── database/
-│   │   ├── handlers/
-│   │   ├── models/
-│   │   └── services/
-│   ├── Dockerfile
-│   └── go.mod
-│
-├── docker-compose.yml       # Orchestration
-├── .env                     # Environment variables
-└── README.md
-```
+### Frontend
 
-## 🔧 Development
+- **React 18** (Vite): Framework UI yang cepat dan reaktif.
+- **Material UI (MUI)**: Desain antarmuka modern, bersih, dan profesional.
+- **Recharts**: Visualisasi data statistik.
+- **React Router**: Manajemen navigasi aplikasi.
 
-### Frontend Development
+### Backend Admin (Service 1)
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- **Node.js & Express**: RESTful API yang ringan dan cepat.
+- **TypeScript**: Type-safety untuk pengembangan yang lebih handal.
+- **MySQL2**: Driver database yang efisien.
+- **Bcrypt.js**: Keamanan password standar industri.
 
-### Express API Development
+### Backend Core (Service 2)
+
+- **Golang**: Bahasa performa tinggi untuk proses bisnis inti.
+- **Gin Gonic**: Web framework Golang.
+
+### Database & DevOps
+
+- **MySQL 8.0**: Relational database.
+- **Docker & Docker Compose**: Kontainerisasi aplikasi untuk kemudahan deployment.
+
+## 📋 Prasyarat
+
+- **Node.js 20+**
+- **Go 1.21+**
+- **Docker Desktop** (Opsional, jika ingin menjalankan via container)
+
+## 🏃‍♂️ Cara Menjalankan (Local Development)
+
+### 1. Setup Database
+
+Pastikan MySQL service berjalan dan restore `database/schema.sql`.
+
+### 2. Jalankan Backend Admin (Express)
 
 ```bash
 cd api-express
 npm install
 npm run dev
+# Server berjalan di http://localhost:5000
 ```
 
-### Golang API Development
+### 3. Jalankan Backend Core (Golang) (Opsional)
 
 ```bash
 cd api-golang
-go mod download
 go run cmd/main.go
+# Server berjalan di http://localhost:8080
 ```
 
-## 🐳 Docker Commands
+### 4. Jalankan Frontend
 
 ```bash
-# Start services
-docker-compose up
-
-# Stop services
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# View specific service logs
-docker-compose logs -f frontend
-docker-compose logs -f api-express
-docker-compose logs -f api-golang
-
-# Rebuild services
-docker-compose up --build
-
-# Remove volumes (reset database)
-docker-compose down -v
+cd frontend
+npm install
+npm run dev
+# Akses aplikasi di http://localhost:3000
 ```
 
-## 🔐 Environment Variables
+## 🔐 Akun Default
 
-### Database
+| Role         | Email              | Password  |
+| ------------ | ------------------ | --------- |
+| **Admin**    | admin@gmail.com    | dsadsadsa |
+| **HR**       | hr@gmail.com       | 123456    |
+| **Finance**  | finance@gmail.com  | 123456    |
+| **Employee** | employee@gmail.com | 123456    |
 
-- `DB_HOST`: MySQL host (default: mysql)
-- `DB_PORT`: MySQL port (default: 3306)
-- `DB_USER`: Database user
-- `DB_PASSWORD`: Database password
-- `DB_NAME`: Database name
+---
 
-### Express API
-
-- `EXPRESS_PORT`: API port (default: 5000)
-- `JWT_SECRET`: JWT secret key
-- `JWT_EXPIRES_IN`: Token expiration time
-
-### Golang API
-
-- `GOLANG_PORT`: API port (default: 8080)
-
-### Frontend
-
-- `VITE_API_EXPRESS_URL`: Express API URL
-- `VITE_API_GOLANG_URL`: Golang API URL
-
-## 📊 Role & Permissions
-
-### Admin
-
-- Manajemen Divisi IT
-- Konfigurasi Gaji, Cuti, Presensi
-- Manajemen User & Role
-
-### HR (Human Resource)
-
-- Monitoring Presensi
-- Manajemen Izin & Cuti
-- Review Draft Gaji
-
-### Keuangan (Finance)
-
-- Pembayaran Gaji
-- Laporan Keuangan
-- Export Data
-
-### Karyawan
-
-- Presensi GPS
-- Pengajuan Izin & Cuti
-- Lihat Slip Gaji
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-- React 18
-- Vite
-- Material UI (MUI)
-- Axios
-- React Router
-
-### Backend
-
-- Express.js (Panel Admin)
-- Golang + Gin (Panel HR, Keuangan, Karyawan)
-- MySQL 8.0
-
-### DevOps
-
-- Docker & Docker Compose
-- Multi-stage builds
-- Health checks
-- Volume persistence
-
-## 📝 API Endpoints
-
-### Express API (Port 5000)
-
-- `GET /health` - Health check
-- `GET /api` - API info
-- `POST /api/divisions` - Manage divisions
-- `POST /api/salary-config` - Salary configuration
-- `POST /api/leave-config` - Leave configuration
-- `POST /api/attendance-config` - Attendance configuration
-- `POST /api/users` - User management
-
-### Golang API (Port 8080)
-
-- `GET /health` - Health check
-- `GET /api` - API info
-- `POST /api/attendance` - Attendance (GPS validation)
-- `GET /api/leave` - Leave requests
-- `GET /api/payroll` - Payroll calculation
-- `GET /api/payment` - Payment management
-- `GET /api/slip/:id` - Payslip
-- `GET /api/report` - Reports
-
-## 🐛 Troubleshooting
-
-### Port sudah digunakan
-
-```bash
-# Check port usage
-sudo lsof -i :3000
-sudo lsof -i :5000
-sudo lsof -i :8080
-
-# Kill process
-sudo kill -9 <PID>
-```
-
-### Database connection error
-
-```bash
-# Check MySQL container
-docker-compose logs mysql
-
-# Restart MySQL
-docker-compose restart mysql
-```
-
-### Container tidak start
-
-```bash
-# Check container status
-docker-compose ps
-
-# View logs
-docker-compose logs <service-name>
-
-# Rebuild
-docker-compose up --build --force-recreate
-```
-
-## 📄 License
-
-MIT License
-
-## 👥 Contributors
-
-HRIS Development Team
+_Developed by HRIS Development Team_
