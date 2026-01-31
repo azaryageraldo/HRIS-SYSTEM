@@ -1,5 +1,5 @@
-import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
-import db from '../config/database';
+import pool from '../config/database';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 export interface KonfigurasiCuti {
   id: number;
@@ -8,135 +8,50 @@ export interface KonfigurasiCuti {
   jatah_cuti_tahunan: number;
   tahun_berlaku: number;
   aktif: boolean;
-  dibuat_pada?: Date;
-  diperbarui_pada?: Date;
-}
-
-export interface CreateKonfigurasiCutiRequest {
-  divisi_id: number;
-  jatah_cuti_tahunan: number;
-  tahun_berlaku: number;
-}
-
-export interface UpdateKonfigurasiCutiRequest {
-  jatah_cuti_tahunan?: number;
-  tahun_berlaku?: number;
+  dibuat_pada: string;
+  diperbarui_pada: string;
 }
 
 class KonfigurasiCutiModel {
-  /**
-   * Get all leave configurations with division names
-   */
-  static async getAll(): Promise<KonfigurasiCuti[]> {
-    const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT 
-        kc.id,
-        kc.divisi_id,
-        d.nama AS nama_divisi,
-        kc.jatah_cuti_tahunan,
-        kc.tahun_berlaku,
-        kc.aktif,
-        kc.dibuat_pada,
-        kc.diperbarui_pada
-       FROM konfigurasi_cuti kc
-       JOIN divisi d ON kc.divisi_id = d.id
-       WHERE kc.aktif = TRUE
-       ORDER BY kc.tahun_berlaku DESC, d.nama ASC`
-    );
+  static async getAll(tahun: number): Promise<KonfigurasiCuti[]> {
+    const query = `
+      SELECT kc.*, d.nama as nama_divisi 
+      FROM konfigurasi_cuti kc
+      JOIN divisi d ON kc.divisi_id = d.id
+      WHERE kc.aktif = true AND d.aktif = true AND kc.tahun_berlaku = ?
+      ORDER BY d.nama ASC
+    `;
+    const [rows] = await pool.query<RowDataPacket[]>(query, [tahun]);
     return rows as KonfigurasiCuti[];
   }
 
-  /**
-   * Get leave configuration by ID
-   */
-  static async getById(id: number): Promise<KonfigurasiCuti | null> {
-    const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT 
-        kc.id,
-        kc.divisi_id,
-        d.nama AS nama_divisi,
-        kc.jatah_cuti_tahunan,
-        kc.tahun_berlaku,
-        kc.aktif,
-        kc.dibuat_pada,
-        kc.diperbarui_pada
-       FROM konfigurasi_cuti kc
-       JOIN divisi d ON kc.divisi_id = d.id
-       WHERE kc.id = ?`,
-      [id]
+  static async getByDivisionId(divisiId: number, tahun: number): Promise<KonfigurasiCuti | null> {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      'SELECT * FROM konfigurasi_cuti WHERE divisi_id = ? AND tahun_berlaku = ? AND aktif = true ORDER BY id DESC LIMIT 1',
+      [divisiId, tahun]
     );
-    return rows.length > 0 ? (rows[0] as KonfigurasiCuti) : null;
+    return (rows[0] as KonfigurasiCuti) || null;
   }
 
-  /**
-   * Get leave configuration by division and year
-   */
-  static async getByDivisiAndYear(divisi_id: number, tahun: number): Promise<KonfigurasiCuti | null> {
-    const [rows] = await db.query<RowDataPacket[]>(
-      `SELECT 
-        kc.id,
-        kc.divisi_id,
-        d.nama AS nama_divisi,
-        kc.jatah_cuti_tahunan,
-        kc.tahun_berlaku,
-        kc.aktif
-       FROM konfigurasi_cuti kc
-       JOIN divisi d ON kc.divisi_id = d.id
-       WHERE kc.divisi_id = ? AND kc.tahun_berlaku = ? AND kc.aktif = TRUE`,
-      [divisi_id, tahun]
-    );
-    return rows.length > 0 ? (rows[0] as KonfigurasiCuti) : null;
-  }
+  static async upsert(data: Partial<KonfigurasiCuti>): Promise<KonfigurasiCuti> {
+    // Check if exists
+    const existing = await this.getByDivisionId(data.divisi_id!, data.tahun_berlaku!);
 
-  /**
-   * Create new leave configuration
-   */
-  static async create(data: CreateKonfigurasiCutiRequest): Promise<number> {
-    const [result] = await db.query<ResultSetHeader>(
-      `INSERT INTO konfigurasi_cuti (divisi_id, jatah_cuti_tahunan, tahun_berlaku) 
-       VALUES (?, ?, ?)`,
-      [data.divisi_id, data.jatah_cuti_tahunan, data.tahun_berlaku]
-    );
-    return result.insertId;
-  }
-
-  /**
-   * Update leave configuration
-   */
-  static async update(id: number, data: UpdateKonfigurasiCutiRequest): Promise<number> {
-    const fields: string[] = [];
-    const values: any[] = [];
-
-    if (data.jatah_cuti_tahunan !== undefined) {
-      fields.push('jatah_cuti_tahunan = ?');
-      values.push(data.jatah_cuti_tahunan);
+    if (existing) {
+      // Update
+      await pool.query<ResultSetHeader>(
+        'UPDATE konfigurasi_cuti SET jatah_cuti_tahunan = ? WHERE id = ?',
+        [data.jatah_cuti_tahunan, existing.id]
+      );
+      return { ...existing, ...data } as KonfigurasiCuti;
+    } else {
+      // Insert
+      await pool.query<ResultSetHeader>(
+        'INSERT INTO konfigurasi_cuti (divisi_id, jatah_cuti_tahunan, tahun_berlaku) VALUES (?, ?, ?)',
+        [data.divisi_id, data.jatah_cuti_tahunan, data.tahun_berlaku]
+      );
+      return (await this.getByDivisionId(data.divisi_id!, data.tahun_berlaku!)) as KonfigurasiCuti;
     }
-    if (data.tahun_berlaku !== undefined) {
-      fields.push('tahun_berlaku = ?');
-      values.push(data.tahun_berlaku);
-    }
-
-    if (fields.length === 0) {
-      return 0;
-    }
-
-    values.push(id);
-    const [result] = await db.query<ResultSetHeader>(
-      `UPDATE konfigurasi_cuti SET ${fields.join(', ')} WHERE id = ?`,
-      values
-    );
-    return result.affectedRows;
-  }
-
-  /**
-   * Delete (soft delete) leave configuration
-   */
-  static async delete(id: number): Promise<number> {
-    const [result] = await db.query<ResultSetHeader>(
-      'UPDATE konfigurasi_cuti SET aktif = FALSE WHERE id = ?',
-      [id]
-    );
-    return result.affectedRows;
   }
 }
 

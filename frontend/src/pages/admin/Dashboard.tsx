@@ -89,7 +89,7 @@ const AdminDashboard: React.FC = () => {
           bgcolor: '#f5f7fa',
           pt: 3,
           pb: 3,
-          pl: 0, // No gap on left side
+          pl: 3, // Match right padding
           pr: 3  // Keep right padding
         }}
       >

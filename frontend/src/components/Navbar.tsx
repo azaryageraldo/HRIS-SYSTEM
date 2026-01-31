@@ -12,14 +12,18 @@ import {
   Divider,
   ListItemIcon,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Tooltip,
+  Paper
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Notifications,
-  AccountCircle,
+  NotificationsOutlined,
+  PersonOutline,
   Logout,
-  Settings as SettingsIcon
+  SettingsOutlined,
+  Search,
+  KeyboardArrowDown
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -78,14 +82,15 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
       elevation={0}
       sx={{
         zIndex: theme.zIndex.drawer + 1,
-        bgcolor: 'white',
+        bgcolor: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(12px)',
         color: 'text.primary',
-        borderBottom: '1px solid #e0e0e0',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-        ...(isMobile ? {} : { ml: '260px', width: 'calc(100% - 260px)' })
+        borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+        ...(isMobile ? {} : { ml: '260px', width: 'calc(100% - 260px)' }),
+        transition: 'all 0.3s ease'
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ minHeight: 70 }}>
         {/* Menu Button (Mobile) */}
         {isMobile && (
           <IconButton
@@ -95,76 +100,121 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             onClick={onMenuClick}
             sx={{ 
               mr: 2,
-              color: '#424242',
-              '&:hover': {
-                bgcolor: '#f5f5f5'
-              }
+              color: '#64748b',
+              '&:hover': { bgcolor: '#f1f5f9' }
             }}
           >
             <MenuIcon />
           </IconButton>
         )}
 
-        {/* Page Title */}
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
-            flexGrow: 1, 
-            fontWeight: 700,
-            color: '#1a1a1a',
-            letterSpacing: '-0.5px'
-          }}
-        >
-          Dashboard
-        </Typography>
-
-        {/* Right Side Actions */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Notifications */}
-          <IconButton
-            color="inherit"
-            onClick={handleNotifOpen}
-            aria-label="notifications"
-            sx={{
-              color: '#616161',
-              '&:hover': {
-                bgcolor: '#f5f5f5'
-              }
+        {/* Page Title & Breadcrumbs Simulation */}
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              fontWeight: 700,
+              color: '#1e293b',
+              letterSpacing: '-0.5px',
+              fontSize: '1.1rem'
             }}
           >
-            <Badge 
-              badgeContent={3} 
+            Dashboard
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+            Overview & Statistics
+          </Typography>
+        </Box>
+
+        {/* Right Side Actions */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          
+          {/* Search Button (Optional) */}
+          <Tooltip title="Search">
+            <IconButton
               sx={{
-                '& .MuiBadge-badge': {
-                  bgcolor: '#424242',
-                  color: 'white'
-                }
+                color: '#64748b',
+                '&:hover': { bgcolor: '#f1f5f9' }
               }}
             >
-              <Notifications />
-            </Badge>
-          </IconButton>
+              <Search fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          {/* Notifications */}
+          <Tooltip title="Notifications">
+            <IconButton
+              onClick={handleNotifOpen}
+              sx={{
+                color: '#64748b',
+                '&:hover': { bgcolor: '#f1f5f9' }
+              }}
+            >
+              <Badge 
+                badgeContent={3} 
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    boxShadow: '0 0 0 2px white'
+                  }
+                }}
+              >
+                <NotificationsOutlined />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
+          <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto', mx: 1, borderColor: '#e2e8f0' }} />
 
           {/* User Profile */}
-          <IconButton
+          <Box
             onClick={handleProfileMenuOpen}
-            sx={{ p: 0.5 }}
-            aria-label="user profile"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              cursor: 'pointer',
+              py: 0.5,
+              px: 1,
+              borderRadius: 2,
+              transition: 'all 0.2s',
+              '&:hover': { bgcolor: '#f1f5f9' }
+            }}
           >
             <Avatar
               sx={{
-                width: 36,
-                height: 36,
-                bgcolor: '#424242',
-                color: 'white',
-                fontSize: '0.875rem',
-                fontWeight: 600
+                width: 38,
+                height: 38,
+                bgcolor: 'transparent',
+                border: '2px solid #3b82f6',
+                p: 0.5
               }}
             >
-              {user ? getInitials(user.nama_lengkap) : 'U'}
+              <Avatar
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  bgcolor: '#3b82f6',
+                  fontSize: '0.85rem',
+                  fontWeight: 600
+                }}
+              >
+                {user ? getInitials(user.nama_lengkap) : 'U'}
+              </Avatar>
             </Avatar>
-          </IconButton>
+            
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#334155', lineHeight: 1.2 }}>
+                {user?.nama_lengkap}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#94a3b8', lineHeight: 1 }}>
+                {user?.peran}
+              </Typography>
+            </Box>
+            
+            <KeyboardArrowDown sx={{ color: '#94a3b8', fontSize: 18 }} />
+          </Box>
         </Box>
 
         {/* Profile Menu */}
@@ -175,39 +225,58 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           PaperProps={{
-            sx: { width: 220, mt: 1 }
+            elevation: 0,
+            sx: {
+              width: 240,
+              mt: 1.5,
+              overflow: 'visible',
+              filter: 'drop-shadow(0px 10px 30px rgba(0,0,0,0.1))',
+              border: '1px solid #e2e8f0',
+              borderRadius: 3,
+              '&:before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                right: 28,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+                borderTop: '1px solid #e2e8f0',
+                borderLeft: '1px solid #e2e8f0',
+              },
+            }
           }}
         >
-          <Box sx={{ px: 2, py: 1.5 }}>
-            <Typography variant="subtitle2" fontWeight="bold" color="#1a1a1a">
-              {user?.nama_lengkap}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {user?.email}
-            </Typography>
-            <Typography variant="caption" display="block" sx={{ color: '#616161', fontWeight: 600 }}>
-              {user?.peran}
-            </Typography>
+          <Box sx={{ px: 3, py: 2 }}>
+             <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#1e293b' }}>
+               User Profile
+             </Typography>
+             <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+               Manage your account settings and preferences.
+             </Typography>
           </Box>
-          <Divider />
-          <MenuItem onClick={handleProfile}>
+          <Divider sx={{ borderColor: '#f1f5f9' }} />
+          <MenuItem onClick={handleProfile} sx={{ py: 1.5, px: 3 }}>
             <ListItemIcon>
-              <AccountCircle fontSize="small" />
+              <PersonOutline fontSize="small" sx={{ color: '#64748b' }} />
             </ListItemIcon>
-            Profile
+            <Typography variant="body2" fontWeight={500} color="#334155">My Profile</Typography>
           </MenuItem>
-          <MenuItem onClick={handleProfileMenuClose}>
+          <MenuItem onClick={handleProfileMenuClose} sx={{ py: 1.5, px: 3 }}>
             <ListItemIcon>
-              <SettingsIcon fontSize="small" />
+              <SettingsOutlined fontSize="small" sx={{ color: '#64748b' }} />
             </ListItemIcon>
-            Settings
+            <Typography variant="body2" fontWeight={500} color="#334155">Account Settings</Typography>
           </MenuItem>
-          <Divider />
-          <MenuItem onClick={handleLogout}>
+          <Divider sx={{ borderColor: '#f1f5f9' }} />
+          <MenuItem onClick={handleLogout} sx={{ py: 1.5, px: 3, '&:hover': { bgcolor: '#fef2f2' } }}>
             <ListItemIcon>
-              <Logout fontSize="small" color="error" />
+              <Logout fontSize="small" sx={{ color: '#ef4444' }} />
             </ListItemIcon>
-            <Typography color="error">Logout</Typography>
+            <Typography variant="body2" fontWeight={600} color="#ef4444">Sign Out</Typography>
           </MenuItem>
         </Menu>
 
@@ -219,42 +288,62 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           PaperProps={{
-            sx: { width: 320, mt: 1, maxHeight: 400 }
+            elevation: 0,
+            sx: {
+              width: 360,
+              mt: 1.5,
+              maxHeight: 480,
+              filter: 'drop-shadow(0px 10px 30px rgba(0,0,0,0.1))',
+              border: '1px solid #e2e8f0',
+              borderRadius: 3,
+            }
           }}
         >
-          <Box sx={{ px: 2, py: 1.5 }}>
-            <Typography variant="subtitle2" fontWeight="bold">
+          <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
               Notifications
             </Typography>
+            <Typography variant="caption" sx={{ color: '#3b82f6', fontWeight: 600, cursor: 'pointer' }}>
+              Mark all as read
+            </Typography>
           </Box>
-          <Divider />
-          <MenuItem onClick={handleNotifClose}>
+          <Divider sx={{ borderColor: '#f1f5f9' }} />
+          <MenuItem onClick={handleNotifClose} sx={{ py: 2, px: 3, whiteSpace: 'normal', alignItems: 'flex-start' }}>
+            <Box sx={{ mr: 2, mt: 0.5 }}>
+              <Box sx={{ width: 8, height: 8, bgcolor: '#3b82f6', borderRadius: '50%' }} />
+            </Box>
             <Box>
-              <Typography variant="body2">New leave request from John Doe</Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="body2" fontWeight={600} color="#334155" gutterBottom>
+                New leave request from John Doe
+              </Typography>
+              <Typography variant="body2" color="#64748b" sx={{ mb: 0.5 }}>
+                Requesting annual leave for 3 days starting next Monday.
+              </Typography>
+              <Typography variant="caption" color="#94a3b8">
                 2 hours ago
               </Typography>
             </Box>
           </MenuItem>
-          <MenuItem onClick={handleNotifClose}>
+          <Divider sx={{ borderColor: '#f1f5f9' }} />
+          <MenuItem onClick={handleNotifClose} sx={{ py: 2, px: 3, whiteSpace: 'normal', alignItems: 'flex-start' }}>
+            <Box sx={{ mr: 2, mt: 0.5 }}>
+              <Box sx={{ width: 8, height: 8, bgcolor: '#3b82f6', borderRadius: '50%' }} />
+            </Box>
             <Box>
-              <Typography variant="body2">Payroll draft ready for review</Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="body2" fontWeight={600} color="#334155" gutterBottom>
+                Payroll draft ready for review
+              </Typography>
+              <Typography variant="body2" color="#64748b" sx={{ mb: 0.5 }}>
+                February 2026 payroll calculation has been completed.
+              </Typography>
+              <Typography variant="caption" color="#94a3b8">
                 5 hours ago
               </Typography>
             </Box>
           </MenuItem>
-          <MenuItem onClick={handleNotifClose}>
-            <Box>
-              <Typography variant="body2">System maintenance scheduled</Typography>
-              <Typography variant="caption" color="text.secondary">
-                1 day ago
-              </Typography>
-            </Box>
-          </MenuItem>
-          <Divider />
-          <MenuItem onClick={handleNotifClose} sx={{ justifyContent: 'center' }}>
-            <Typography variant="caption" color="primary">
+          <Divider sx={{ borderColor: '#f1f5f9' }} />
+          <MenuItem onClick={handleNotifClose} sx={{ py: 1.5, justifyContent: 'center' }}>
+            <Typography variant="button" sx={{ fontSize: '0.75rem', color: '#3b82f6', textTransform: 'none' }}>
               View all notifications
             </Typography>
           </MenuItem>

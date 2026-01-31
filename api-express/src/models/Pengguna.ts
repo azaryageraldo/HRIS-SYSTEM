@@ -1,91 +1,89 @@
-import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
-import { Pengguna, CreatePenggunaRequest, UpdatePenggunaRequest } from '../types';
-import db from '../config/database';
+import pool from '../config/database';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
+
+export interface Pengguna {
+  id: number;
+  username: string;
+  email: string;
+  password?: string; // Optional for response
+  nama_lengkap: string;
+  peran_id: number;
+  divisi_id: number | null;
+  nama_peran?: string;
+  nama_divisi?: string;
+  aktif: boolean;
+  dibuat_pada: string;
+}
 
 class PenggunaModel {
   static async getAll(): Promise<Pengguna[]> {
-    const [rows] = await db.query<RowDataPacket[]>(`
-      SELECT 
-        p.id, 
-        p.username, 
-        p.email, 
-        p.nama_lengkap, 
-        p.telepon,
-        pr.nama AS peran,
-        d.nama AS divisi,
-        p.aktif,
-        p.dibuat_pada
+    const query = `
+      SELECT p.id, p.username, p.email, p.nama_lengkap, p.peran_id, p.divisi_id, p.aktif, p.dibuat_pada,
+             r.nama as nama_peran, d.nama as nama_divisi
       FROM pengguna p
-      LEFT JOIN peran pr ON p.peran_id = pr.id
+      JOIN peran r ON p.peran_id = r.id
       LEFT JOIN divisi d ON p.divisi_id = d.id
-      WHERE p.aktif = TRUE
-    `);
+      ORDER BY p.dibuat_pada DESC
+    `;
+    const [rows] = await pool.query<RowDataPacket[]>(query);
     return rows as Pengguna[];
   }
 
-  static async getById(id: number): Promise<Pengguna | null> {
-    const [rows] = await db.query<RowDataPacket[]>(`
-      SELECT 
-        p.id, 
-        p.username, 
-        p.email, 
-        p.nama_lengkap, 
-        p.telepon,
-        p.peran_id,
-        p.divisi_id,
-        p.nama_bank,
-        p.nomor_rekening,
-        p.nama_pemilik_rekening,
-        pr.nama AS peran,
-        d.nama AS divisi,
-        p.aktif,
-        p.dibuat_pada,
-        p.diperbarui_pada
-      FROM pengguna p
-      LEFT JOIN peran pr ON p.peran_id = pr.id
-      LEFT JOIN divisi d ON p.divisi_id = d.id
-      WHERE p.id = ?
-    `, [id]);
-    return rows.length > 0 ? (rows[0] as Pengguna) : null;
-  }
-
-  static async getByUsername(username: string): Promise<Pengguna | null> {
-    const [rows] = await db.query<RowDataPacket[]>(
-      'SELECT * FROM pengguna WHERE username = ?',
-      [username]
-    );
-    return rows.length > 0 ? (rows[0] as Pengguna) : null;
-  }
-
-  static async create(data: CreatePenggunaRequest): Promise<number> {
-    const [result] = await db.query<ResultSetHeader>(
-      `INSERT INTO pengguna 
-       (username, email, password, nama_lengkap, telepon, peran_id, divisi_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [data.username, data.email, data.password, data.nama_lengkap, 
-       data.telepon || null, data.peran_id, data.divisi_id || null]
-    );
+  static async create(data: Partial<Pengguna>): Promise<number> {
+    const query = `
+      INSERT INTO pengguna (username, email, password, nama_lengkap, peran_id, divisi_id, aktif)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    const [result] = await pool.query<ResultSetHeader>(query, [
+      data.username,
+      data.email,
+      data.password,
+      data.nama_lengkap,
+      data.peran_id,
+      data.divisi_id || null,
+      true
+    ]);
     return result.insertId;
   }
 
-  static async update(id: number, data: UpdatePenggunaRequest): Promise<number> {
-    const [result] = await db.query<ResultSetHeader>(
-      `UPDATE pengguna 
-       SET nama_lengkap = ?, telepon = ?, divisi_id = ?, 
-           nama_bank = ?, nomor_rekening = ?, nama_pemilik_rekening = ?
-       WHERE id = ?`,
-      [data.nama_lengkap, data.telepon, data.divisi_id, 
-       data.nama_bank, data.nomor_rekening, data.nama_pemilik_rekening, id]
-    );
-    return result.affectedRows;
+  static async update(id: number, data: Partial<Pengguna>): Promise<boolean> {
+     let query = 'UPDATE pengguna SET username = ?, email = ?, nama_lengkap = ?, peran_id = ?, divisi_id = ?';
+     const params: any[] = [data.username, data.email, data.nama_lengkap, data.peran_id, data.divisi_id || null];
+     
+     if (data.password) {
+       query += ', password = ?';
+       params.push(data.password);
+     }
+     
+     query += ' WHERE id = ?';
+     params.push(id);
+
+     const [result] = await pool.query<ResultSetHeader>(query, params);
+     return result.affectedRows > 0;
   }
 
-  static async delete(id: number): Promise<number> {
-    const [result] = await db.query<ResultSetHeader>(
-      'UPDATE pengguna SET aktif = FALSE WHERE id = ?',
-      [id]
-    );
-    return result.affectedRows;
+  static async toggleActive(id: number): Promise<boolean> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT aktif FROM pengguna WHERE id = ?', [id]);
+    if (rows.length === 0) return false;
+    
+    const newStatus = !rows[0].aktif;
+    await pool.query('UPDATE pengguna SET aktif = ? WHERE id = ?', [newStatus, id]);
+    return true;
+  }
+  
+  static async findById(id: number): Promise<Pengguna | null> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM pengguna WHERE id = ?', [id]);
+    return (rows[0] as Pengguna) || null;
+  }
+  
+  static async findByEmail(email: string): Promise<Pengguna | null> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM pengguna WHERE email = ?', [email]);
+    return (rows[0] as Pengguna) || null;
+  }
+
+  static async findByUsername(username: string): Promise<Pengguna | null> {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM pengguna WHERE username = ?', [username]);
+    return (rows[0] as Pengguna) || null;
   }
 }
 

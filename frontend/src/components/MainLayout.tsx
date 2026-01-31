@@ -29,11 +29,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           flexGrow: 1,
           p: 0,
           width: { sm: `calc(100% - 260px)` },
-          ml: { md: '260px' }
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh'
         }}
       >
-        <Toolbar /> {/* Spacer for fixed navbar */}
-        {children}
+        <Toolbar sx={{ minHeight: 70 }} /> {/* Spacer for fixed navbar */}
+        
+        <Box sx={{ flexGrow: 1 }}>
+          {children}
+        </Box>
       </Box>
     </Box>
   );

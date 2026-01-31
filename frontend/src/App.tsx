@@ -5,6 +5,11 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/Dashboard';
+import DivisiPage from './pages/admin/Divisi';
+import SalaryConfigPage from './pages/admin/SalaryConfig';
+import LeaveConfigPage from './pages/admin/LeaveConfig';
+import AttendanceConfigPage from './pages/admin/AttendanceConfig';
+import UserManagementPage from './pages/admin/UserManagement';
 
 const theme = createTheme({
   palette: {
@@ -50,6 +55,47 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={[1]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/divisi"
+              element={
+                <ProtectedRoute allowedRoles={[1]}>
+                  <DivisiPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/salary-config"
+              element={
+                <ProtectedRoute allowedRoles={[1]}>
+                  <SalaryConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/config/leave"
+              element={
+                <ProtectedRoute allowedRoles={[1]}>
+                  <LeaveConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/config/attendance"
+              element={
+                <ProtectedRoute allowedRoles={[1]}>
+                  <AttendanceConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={[1]}>
+                  <UserManagementPage />
                 </ProtectedRoute>
               }
             />

@@ -80,10 +80,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
       icon: <Settings />,
       roles: [1],
       children: [
-        { title: 'Gaji', icon: <AttachMoney />, path: '/admin/config/gaji' },
-        { title: 'Cuti', icon: <EventNote />, path: '/admin/config/cuti' },
-        { title: 'Presensi', icon: <LocationOn />, path: '/admin/config/presensi' },
-        { title: 'Potongan', icon: <Receipt />, path: '/admin/config/potongan' }
+        { title: 'Gaji', icon: <AttachMoney />, path: '/admin/salary-config' },
+        { title: 'Cuti', icon: <EventNote />, path: '/admin/config/leave' },
+        { title: 'Presensi', icon: <LocationOn />, path: '/admin/config/attendance' }
       ]
     },
     {

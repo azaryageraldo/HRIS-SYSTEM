@@ -54,15 +54,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/divisi', divisiRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
 
-// TODO: Uncomment when ready
-// import konfigurasiGajiRoutes from './routes/konfigurasiGaji';
-// import konfigurasiCutiRoutes from './routes/konfigurasiCuti';
-// import konfigurasiPresensiRoutes from './routes/konfigurasiPresensi';
-// import penggunaRoutes from './routes/pengguna';
-// app.use('/api/konfigurasi-gaji', konfigurasiGajiRoutes);
-// app.use('/api/konfigurasi-cuti', konfigurasiCutiRoutes);
-// app.use('/api/konfigurasi-presensi', konfigurasiPresensiRoutes);
-// app.use('/api/pengguna', penggunaRoutes);
+import konfigurasiGajiRoutes from './routes/salaryConfig';
+import konfigurasiCutiRoutes from './routes/leaveConfig';
+import konfigurasiPresensiRoutes from './routes/attendanceConfig';
+import penggunaRoutes from './routes/userRoutes';
+app.use('/api/konfigurasi-gaji', konfigurasiGajiRoutes);
+app.use('/api/konfigurasi-cuti', konfigurasiCutiRoutes);
+app.use('/api/konfigurasi-presensi', konfigurasiPresensiRoutes);
+app.use('/api/pengguna', penggunaRoutes);
 
 // Error handling middleware
 interface ErrorWithStatus extends Error {
