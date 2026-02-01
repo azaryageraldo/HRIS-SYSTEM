@@ -26,6 +26,7 @@ import {
   Close
 } from '@mui/icons-material';
 import MainLayout from '../../components/MainLayout';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 interface EmployeePayment {
   id: number;
@@ -181,6 +182,7 @@ const PaymentHistory: React.FC = () => {
   return (
     <MainLayout>
       <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f8fafc', minHeight: '100vh' }}>
+        <Breadcrumbs />
         
         <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>

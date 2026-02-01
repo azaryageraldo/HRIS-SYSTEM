@@ -100,6 +100,8 @@ func main() {
 			financeGroup.GET("/payments", financeHandlers.GetPendingPaymentsHandler)
 			financeGroup.POST("/payments/:id/pay", financeHandlers.ProcessPaymentHandler)
 			financeGroup.GET("/history", financeHandlers.GetPaymentHistoryHandler)
+			financeGroup.GET("/reports/export", financeHandlers.ExportSalaryReport)
+			financeGroup.GET("/reports/data", financeHandlers.GetReportData)
 		}
 		// Seeder
 		api.POST("/seed/presensi", seederHandlers.SeedPresensiData)

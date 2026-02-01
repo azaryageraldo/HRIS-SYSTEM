@@ -24,6 +24,7 @@ import {
   AccountBalanceWallet
 } from '@mui/icons-material';
 import MainLayout from '../../components/MainLayout';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 interface EmployeePayment {
   id: number;
@@ -36,6 +37,7 @@ interface EmployeePayment {
   status: string;
   nomor_rekening: string | null;
   nama_pemilik_rekening: string | null;
+  bank: string | null;
 }
 
 const SalaryPayment: React.FC = () => {
@@ -51,8 +53,11 @@ const SalaryPayment: React.FC = () => {
       setLoading(true);
       const response = await fetch('http://localhost:8080/api/finance/payments');
       const result = await response.json();
+      
       if (result.success) {
         setPayments(result.data || []);
+      } else {
+        setSnackbar({ open: true, message: 'Gagal mengambil data: ' + result.message, severity: 'error' });
       }
     } catch (error) {
       console.error('Error fetching payments:', error);
@@ -157,6 +162,8 @@ const SalaryPayment: React.FC = () => {
     <MainLayout>
       <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f8fafc', minHeight: '100vh' }}>
         
+        <Breadcrumbs />
+        
         <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="h4" fontWeight={800} sx={{ color: '#0f172a', mb: 1, letterSpacing: '-0.025em' }}>
@@ -227,7 +234,7 @@ const SalaryPayment: React.FC = () => {
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Bank & Rekening</Typography>
-                    <Typography variant="body2" fontWeight={600}>BCA - {selectedPayment.nomor_rekening || 'Belum diatur'}</Typography>
+                    <Typography variant="body2" fontWeight={600}>{selectedPayment.bank || 'BCA'} - {selectedPayment.nomor_rekening || 'Belum diatur'}</Typography>
                   </Box>
                   <Divider sx={{ my: 1 }} />
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -261,7 +268,12 @@ const SalaryPayment: React.FC = () => {
           </DialogActions>
         </Dialog>
 
-        <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Snackbar 
+          open={snackbar.open} 
+          autoHideDuration={6000} 
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
           <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
             {snackbar.message}
           </Alert>

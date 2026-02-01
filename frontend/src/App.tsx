@@ -17,6 +17,7 @@ import PayrollDraft from './pages/hr/PayrollDraft';
 import FinanceDashboard from './pages/finance/Dashboard';
 import SalaryPayment from './pages/finance/SalaryPayment';
 import PaymentHistory from './pages/finance/PaymentHistory';
+import Reports from './pages/finance/Reports';
 import EmployeeDashboard from './pages/employee/Dashboard';
 
 const theme = createTheme({
@@ -188,6 +189,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={[3]}>
                   <PaymentHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/reports"
+              element={
+                <ProtectedRoute allowedRoles={[3]}>
+                  <Reports />
                 </ProtectedRoute>
               }
             />

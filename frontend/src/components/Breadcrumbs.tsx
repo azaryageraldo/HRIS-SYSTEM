@@ -11,6 +11,13 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ links }) => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
+  const getHomeLink = () => {
+    if (pathnames[0] === 'finance') return '/finance/dashboard';
+    if (pathnames[0] === 'hr') return '/hr/dashboard';
+    if (pathnames[0] === 'employee') return '/employee/dashboard';
+    return '/admin/dashboard';
+  };
+
   const breadcrumbLinks = links || pathnames.map((value, index) => {
     const last = index === pathnames.length - 1;
     const to = `/${pathnames.slice(0, index + 1).join('/')}`;
@@ -31,7 +38,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ links }) => {
       >
         <Link
           component={RouterLink}
-          to="/admin/dashboard"
+          to={getHomeLink()}
           color="inherit"
           sx={{ 
             display: 'flex', 

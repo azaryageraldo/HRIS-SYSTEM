@@ -1,6 +1,8 @@
 package finance
 
 import (
+	"fmt"
+
 	"github.com/hris-system/api-golang/internal/database"
 )
 
@@ -21,6 +23,7 @@ type EmployeePayment struct {
 
 // GetPendingPayments fetches payrolls with status 'dikirim_ke_keuangan' including bank details
 func (s *FinanceService) GetPendingPayments() ([]EmployeePayment, error) {
+	fmt.Println("[DEBUG] Executing GetPendingPayments query...")
 	query := `
 		SELECT 
 			p.id,
@@ -33,6 +36,7 @@ func (s *FinanceService) GetPendingPayments() ([]EmployeePayment, error) {
 			p.status,
 			u.nomor_rekening,
 			u.nama_pemilik_rekening,
+			u.nama_bank,
 			p.dibayar_pada
 		FROM penggajian p
 		JOIN pengguna u ON p.pengguna_id = u.id
@@ -43,12 +47,15 @@ func (s *FinanceService) GetPendingPayments() ([]EmployeePayment, error) {
 
 	rows, err := database.DB.Query(query)
 	if err != nil {
+		fmt.Printf("[DEBUG] Query failed: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	var payments []EmployeePayment
+	count := 0
 	for rows.Next() {
+		count++
 		var ep EmployeePayment
 		err := rows.Scan(
 			&ep.ID,
@@ -61,13 +68,16 @@ func (s *FinanceService) GetPendingPayments() ([]EmployeePayment, error) {
 			&ep.Status,
 			&ep.NomorRekening,
 			&ep.NamaPemilikRekening,
+			&ep.Bank,
 			&ep.DibayarPada,
 		)
 		if err != nil {
+			fmt.Printf("[DEBUG] Scan failed on row %d: %v\n", count, err)
 			return nil, err
 		}
 		payments = append(payments, ep)
 	}
+	fmt.Printf("[DEBUG] GetPendingPayments found %d rows\n", count)
 
 	return payments, nil
 }
@@ -97,6 +107,7 @@ func (s *FinanceService) GetPaymentHistory() ([]EmployeePayment, error) {
 			p.status,
 			u.nomor_rekening,
 			u.nama_pemilik_rekening,
+			u.nama_bank,
 			p.dibayar_pada
 		FROM penggajian p
 		JOIN pengguna u ON p.pengguna_id = u.id
@@ -125,6 +136,7 @@ func (s *FinanceService) GetPaymentHistory() ([]EmployeePayment, error) {
 			&ep.Status,
 			&ep.NomorRekening,
 			&ep.NamaPemilikRekening,
+			&ep.Bank,
 			&ep.DibayarPada,
 		)
 		if err != nil {
