@@ -94,8 +94,13 @@ func main() {
 		api.GET("/hr/gaji/history", hrHandlers.GetPayrollHistoryHandler)
 
 		// Finance Routes
-		api.GET("/finance/dashboard", financeHandlers.GetFinanceDashboardHandler)
-
+		financeGroup := api.Group("/finance")
+		{
+			financeGroup.GET("/dashboard", financeHandlers.GetFinanceDashboardHandler)
+			financeGroup.GET("/payments", financeHandlers.GetPendingPaymentsHandler)
+			financeGroup.POST("/payments/:id/pay", financeHandlers.ProcessPaymentHandler)
+			financeGroup.GET("/history", financeHandlers.GetPaymentHistoryHandler)
+		}
 		// Seeder
 		api.POST("/seed/presensi", seederHandlers.SeedPresensiData)
 		api.POST("/seed/cuti", seederHandlers.SeedLeaveData)

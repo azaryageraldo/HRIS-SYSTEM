@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import {
   Dashboard,
+  History as HistoryIcon,
   People,
   Business,
   Settings,
@@ -23,7 +24,7 @@ import {
   EventNote,
   LocationOn,
   Assignment,
-  AccountBalance,
+  AccountBalanceWallet,
   CalendarToday,
   Receipt,
   ExpandLess,
@@ -112,8 +113,14 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     // Finance menus (role_id: 3)
     {
       title: 'Pembayaran Gaji',
-      icon: <AccountBalance />,
-      path: '/finance/payment',
+      icon: <AccountBalanceWallet />,
+      path: '/finance/salary-payment',
+      roles: [3]
+    },
+    {
+      title: 'Riwayat Pembayaran',
+      icon: <HistoryIcon />,
+      path: '/finance/payment-history',
       roles: [3]
     },
     {

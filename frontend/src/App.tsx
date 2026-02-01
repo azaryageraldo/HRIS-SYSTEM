@@ -15,6 +15,8 @@ import MonitoringPresensi from './pages/hr/MonitoringPresensi';
 import LeaveManagement from './pages/hr/LeaveManagement';
 import PayrollDraft from './pages/hr/PayrollDraft';
 import FinanceDashboard from './pages/finance/Dashboard';
+import SalaryPayment from './pages/finance/SalaryPayment';
+import PaymentHistory from './pages/finance/PaymentHistory';
 import EmployeeDashboard from './pages/employee/Dashboard';
 
 const theme = createTheme({
@@ -170,6 +172,22 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={[3]}>
                   <FinanceDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/salary-payment"
+              element={
+                <ProtectedRoute allowedRoles={[3]}>
+                  <SalaryPayment />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/payment-history"
+              element={
+                <ProtectedRoute allowedRoles={[3]}>
+                  <PaymentHistory />
                 </ProtectedRoute>
               }
             />
