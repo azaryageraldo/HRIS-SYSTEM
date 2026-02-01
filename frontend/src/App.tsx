@@ -10,6 +10,11 @@ import SalaryConfigPage from './pages/admin/SalaryConfig';
 import LeaveConfigPage from './pages/admin/LeaveConfig';
 import AttendanceConfigPage from './pages/admin/AttendanceConfig';
 import UserManagementPage from './pages/admin/UserManagement';
+import HRDashboard from './pages/hr/Dashboard';
+import MonitoringPresensi from './pages/hr/MonitoringPresensi';
+import LeaveManagement from './pages/hr/LeaveManagement';
+import PayrollDraft from './pages/hr/PayrollDraft';
+import FinanceDashboard from './pages/finance/Dashboard';
 
 const theme = createTheme({
   palette: {
@@ -99,7 +104,59 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* HR Routes */}
+            <Route
+              path="/hr/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={[2]}>
+                  <HRDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr/presensi"
+              element={
+                <ProtectedRoute allowedRoles={[2]}>
+                  <MonitoringPresensi />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr/cuti"
+              element={
+                <ProtectedRoute allowedRoles={[2]}>
+                  <LeaveManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr/gaji"
+              element={
+                <ProtectedRoute allowedRoles={[2]}>
+                  <PayrollDraft />
+                </ProtectedRoute>
+              }
+            />
             
+            {/* Finance Routes */}
+            <Route
+              path="/finance/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={[3]}>
+                  <FinanceDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/payment"
+              element={
+                <ProtectedRoute allowedRoles={[3]}>
+                  <FinanceDashboard /> {/* Temporary placeholder until Payment page created */}
+                </ProtectedRoute>
+              }
+            />
+
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

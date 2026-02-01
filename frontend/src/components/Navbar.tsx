@@ -14,7 +14,6 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
-  Paper
 } from '@mui/material';
 import {
   Menu as MenuIcon,

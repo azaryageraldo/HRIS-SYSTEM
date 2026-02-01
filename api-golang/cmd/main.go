@@ -81,6 +81,23 @@ func main() {
 		api.GET("/cuti", handlers.GetPengajuanCuti)
 		api.PUT("/cuti/:id/approve", handlers.ApprovePengajuanCuti)
 
+		// HR Endpoints
+		api.GET("/hr/dashboard", handlers.GetHRDashboardStats)
+		api.GET("/hr/presensi", handlers.GetPresensiMonitoring)
+		api.GET("/hr/cuti", handlers.GetAllLeaveRequestsHandler)
+		api.PUT("/hr/cuti/:id/process", handlers.ProcessLeaveRequestHandler)
+		api.GET("/hr/gaji/draft", handlers.GetPayrollDraftsHandler)
+		api.POST("/hr/gaji/send", handlers.SendPayrollToFinanceHandler)
+		api.GET("/hr/gaji/history", handlers.GetPayrollHistoryHandler)
+
+		// Finance Routes
+		api.GET("/finance/dashboard", handlers.GetFinanceDashboardHandler)
+
+		// Seeder
+		api.POST("/seed/presensi", handlers.SeedPresensiData)
+		api.POST("/seed/cuti", handlers.SeedLeaveData)
+		api.POST("/seed/gaji", handlers.SeedPayrollData)
+
 		// TODO: Add more endpoints
 		// api.GET("/penggajian", handlers.GetPenggajian)
 		// api.GET("/pembayaran", handlers.GetPembayaran)
