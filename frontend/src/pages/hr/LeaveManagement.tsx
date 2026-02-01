@@ -54,6 +54,7 @@ const LeaveManagement: React.FC = () => {
   
   // Dialog State
   const [openDialog, setOpenDialog] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [notes, setNotes] = useState('');
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
@@ -89,6 +90,11 @@ const LeaveManagement: React.FC = () => {
     setActionType(type);
     setNotes('');
     setOpenDialog(true);
+  };
+
+  const handleOpenDetail = (req: LeaveRequest) => {
+    setSelectedRequest(req);
+    setOpenDetail(true);
   };
 
   const handleProcessRequest = async () => {
@@ -201,7 +207,7 @@ const LeaveManagement: React.FC = () => {
             </>
           ) : (
              <Tooltip title="Lihat Detail">
-                <IconButton size="small">
+                <IconButton size="small" onClick={() => handleOpenDetail(params.row)}>
                   <Visibility />
                 </IconButton>
               </Tooltip>
@@ -292,6 +298,84 @@ const LeaveManagement: React.FC = () => {
             >
               Konfirmasi
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* View Detail Dialog */}
+        <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ fontWeight: 700 }}>
+            Detail Pengajuan Cuti
+          </DialogTitle>
+          <DialogContent dividers>
+            {selectedRequest && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                
+                {/* Header Information */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" fontWeight={700}>{selectedRequest.nama_lengkap}</Typography>
+                    <Typography variant="body2" color="text.secondary">{selectedRequest.divisi || 'Tanpa Divisi'}</Typography>
+                  </Box>
+                  <Chip 
+                    label={selectedRequest.status} 
+                    color={
+                      selectedRequest.status === 'disetujui' ? 'success' : 
+                      selectedRequest.status === 'ditolak' ? 'error' : 'warning'
+                    }
+                    size="small"
+                    sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+                  />
+                </Box>
+                
+                <Box sx={{ bgcolor: '#f8fafc', p: 2, borderRadius: 2, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Tipe Cuti</Typography>
+                    <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>
+                      {selectedRequest.tipe_cuti}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Total Hari</Typography>
+                    <Typography variant="body2" fontWeight={600}>{selectedRequest.total_hari} Hari</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Tanggal Mulai</Typography>
+                    <Typography variant="body2" fontWeight={600}>{selectedRequest.tanggal_mulai}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Tanggal Selesai</Typography>
+                    <Typography variant="body2" fontWeight={600}>{selectedRequest.tanggal_selesai}</Typography>
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>Alasan Pengajuan</Typography>
+                  <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fff' }}>
+                    <Typography variant="body2">{selectedRequest.alasan}</Typography>
+                  </Paper>
+                </Box>
+
+                {selectedRequest.catatan_persetujuan && (
+                   <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>Catatan HR/Approver</Typography>
+                    <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f0fdf4', borderColor: '#bbf7d0' }}>
+                      <Typography variant="body2" color="#15803d">{selectedRequest.catatan_persetujuan}</Typography>
+                    </Paper>
+                  </Box>
+                )}
+
+                <Box sx={{ mt: 1, pt: 2, borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+                   <Typography variant="body2" color="text.secondary">Sisa Cuti Tahunan:</Typography>
+                   <Typography variant="body2" fontWeight={700} color={selectedRequest.sisa_cuti < 0 ? 'error' : 'primary'}>
+                     {selectedRequest.sisa_cuti} Hari
+                   </Typography>
+                </Box>
+
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setOpenDetail(false)} variant="outlined">Tutup</Button>
           </DialogActions>
         </Dialog>
 

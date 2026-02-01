@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Avatar,
   CircularProgress
 } from '@mui/material';
 import {
@@ -14,7 +13,6 @@ import {
   AccountBalanceWallet
 } from '@mui/icons-material';
 import MainLayout from '../../components/MainLayout';
-import Breadcrumbs from '../../components/Breadcrumbs';
 
 interface MonthlyExpense {
   bulan: number;
@@ -54,41 +52,54 @@ const FinanceDashboard: React.FC = () => {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
   };
 
   const StatCard = ({ title, value, icon, color, subValue }: any) => (
-    <Card sx={{ height: '100%', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
-      <Box 
-        sx={{ 
-          position: 'absolute', 
-          right: -20, 
-          top: -20, 
-          width: 100, 
-          height: 100, 
-          borderRadius: '50%', 
-          bgcolor: `${color}10`, // 10% opacity
-          zIndex: 0 
-        }} 
-      />
-      <CardContent sx={{ position: 'relative', zIndex: 1, p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box>
-            <Typography variant="body2" color="text.secondary" fontWeight={600} gutterBottom>
-              {title}
-            </Typography>
-            <Typography variant="h5" fontWeight={800} sx={{ color: '#1e293b' }}>
-              {value}
-            </Typography>
-            {subValue && (
-              <Typography variant="caption" sx={{ color: color, fontWeight: 600, mt: 1, display: 'block' }}>
-                {subValue}
-              </Typography>
-            )}
-          </Box>
-          <Avatar sx={{ bgcolor: `${color}20`, color: color, width: 48, height: 48, borderRadius: 2 }}>
+    <Card 
+      elevation={0}
+      sx={{ 
+        height: '100%', 
+        borderRadius: 3, 
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          borderColor: `${color}40`, // 25% opacity
+          transform: 'translateY(-2px)',
+          boxShadow: `0 4px 12px ${color}15` // 10% opacity colored shadow
+        }
+      }}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <Box 
+            sx={{ 
+              p: 1.5, 
+              borderRadius: 2, 
+              bgcolor: `${color}10`, // 10% opacity bg
+              color: color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             {icon}
-          </Avatar>
+          </Box>
+          <Typography variant="body2" color="text.secondary" fontWeight={600}>
+            {title}
+          </Typography>
+        </Box>
+        
+        <Box>
+          <Typography variant="h4" fontWeight={800} sx={{ color: '#0f172a', letterSpacing: '-0.02em', mb: 0.5 }}>
+            {value}
+          </Typography>
+          {subValue && (
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+              {subValue}
+            </Typography>
+          )}
         </Box>
       </CardContent>
     </Card>
@@ -103,7 +114,7 @@ const FinanceDashboard: React.FC = () => {
     return (
       <MainLayout>
         <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-          <CircularProgress />
+          <CircularProgress size={60} thickness={4} sx={{ color: '#6366f1' }} />
         </Box>
       </MainLayout>
     );
@@ -111,68 +122,99 @@ const FinanceDashboard: React.FC = () => {
 
   return (
     <MainLayout>
-      <Box sx={{ p: 3 }}>
-        <Breadcrumbs />
+      <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f8fafc', minHeight: '100vh' }}>
         
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ color: '#0f172a', mb: 1 }}>
-            Dashboard Keuangan
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Ringkasan pembayaran gaji dan pengeluaran {stats?.periode}.
-          </Typography>
+        <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h4" fontWeight={800} sx={{ color: '#0f172a', mb: 1, letterSpacing: '-0.025em' }}>
+              Dashboard Keuangan
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Ringkasan periode <Typography component="span" fontWeight={600} color="primary">{stats?.periode}</Typography>
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
+            <Typography variant="caption" color="text.secondary" display="block">Terakhir diperbarui</Typography>
+            <Typography variant="body2" fontWeight={600}>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Typography>
+          </Box>
         </Box>
 
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 3, mb: 4 }}>
             <StatCard 
               title="Tagihan Gaji (Pending)" 
               value={formatCurrency(stats?.total_gaji_harus_dibayar || 0)} 
-              icon={<AttachMoney fontSize="large" />} 
-              color="#eab308"
-              subValue={`${stats?.karyawan_belum_dibayar || 0} Karyawan belum dibayar`}
+              icon={<AttachMoney fontSize="medium" />} 
+              color="#f59e0b" // Amber
+              gradient="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
+              subValue={
+                <>
+                  <Box component="span" sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b', display: 'inline-block' }} />
+                  {stats?.karyawan_belum_dibayar || 0} Karyawan belum dibayar
+                </>
+              }
             />
              <StatCard 
               title="Pengeluaran Bulan Ini" 
               value={formatCurrency(stats?.total_pengeluaran_bulan || 0)} 
-              icon={<AccountBalanceWallet fontSize="large" />} 
-              color="#3b82f6"
-              subValue={`${stats?.karyawan_sudah_dibayar || 0} Karyawan sudah lunas`}
+              icon={<AccountBalanceWallet fontSize="medium" />} 
+              color="#3b82f6" // Blue
+              gradient="linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)"
+              subValue={
+                <>
+                  <Box component="span" sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#3b82f6', display: 'inline-block' }} />
+                  {stats?.karyawan_sudah_dibayar || 0} Karyawan lunas
+                </>
+              }
             />
              <StatCard 
-              title="Total Karyawan (Payroll)" 
-              value={totalEmployees} 
-              icon={<People fontSize="large" />} 
-              color="#64748b"
-              subValue="Periode ini"
+              title="Perkiraan Total Gaji" 
+              value={formatCurrency((stats?.total_pengeluaran_bulan || 0) + (stats?.total_gaji_harus_dibayar || 0))} 
+              icon={<TrendingUp fontSize="medium" />} 
+              color="#6366f1" // Indigo
+              gradient="linear-gradient(135deg, #6366f1 0%, #818cf8 100%)"
+              subValue="Estimasi total pengeluaran"
             />
-             <StatCard 
-              title="Progres Pembayaran" 
+              <StatCard 
+              title="Efisiensi Pembayaran" 
               value={`${Math.round(paymentProgress)}%`} 
-              icon={<TrendingUp fontSize="large" />} 
-              color={paymentProgress === 100 ? "#22c55e" : "#f43f5e"}
-               subValue={paymentProgress === 100 ? "Selesai" : "Sedang berjalan"}
+              icon={<People fontSize="medium" />} 
+              color={paymentProgress === 100 ? "#10b981" : "#ec4899"} // Emerald or Pink
+              gradient={paymentProgress === 100 ? "linear-gradient(135deg, #10b981 0%, #34d399 100%)" : "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)"}
+              subValue={paymentProgress === 100 ? "Seluruh gaji terbayarkan" : "Sedang dalam proses"}
             />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3 }}>
           {/* Progress Section */}
-          <Box sx={{ flex: 1, minWidth: { md: 350 } }}>
-            <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
+          <Box sx={{ flex: 1 }}>
+            <Card sx={{ borderRadius: 4, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', height: '100%', overflow: 'hidden' }}>
+              <CardContent sx={{ p: 4 }}>
                 <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: '#0f172a' }}>
                   Status Pembayaran
                 </Typography>
-                <Box sx={{ mt: 3, textAlign: 'center' }}>
-                   <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                      <CircularProgress variant="determinate" value={100} size={160} sx={{ color: '#f1f5f9' }} />
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+                  Monitor kelengkapan pembayaran gaji karyawan
+                </Typography>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <Box sx={{ position: 'relative', display: 'inline-flex', mb: 4 }}>
+                      <CircularProgress 
+                        variant="determinate" 
+                        value={100} 
+                        size={200} 
+                        thickness={4}
+                        sx={{ color: '#f1f5f9' }} 
+                      />
                       <CircularProgress 
                         variant="determinate" 
                         value={paymentProgress} 
-                        size={160} 
+                        size={200}
+                        thickness={4} 
                         sx={{ 
-                          color: paymentProgress === 100 ? '#22c55e' : '#3b82f6',
+                          color: paymentProgress === 100 ? '#10b981' : '#3b82f6',
                           position: 'absolute',
                           left: 0,
+                          strokeLinecap: 'round'
                         }} 
                       />
                       <Box
@@ -188,28 +230,27 @@ const FinanceDashboard: React.FC = () => {
                           flexDirection: 'column'
                         }}
                       >
-                        <Typography variant="h4" component="div" fontWeight={800} color="text.primary">
+                        <Typography variant="h3" component="div" fontWeight={800} sx={{ color: '#0f172a', letterSpacing: '-0.05em' }}>
                           {Math.round(paymentProgress)}%
                         </Typography>
-                        <Typography variant="caption" component="div" color="text.secondary">
-                          Selesai
+                        <Typography variant="button" sx={{ color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem' }}>
+                          SELESAI
                         </Typography>
                       </Box>
                     </Box>
 
-                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', px: 2 }}>
-                       <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="h6" fontWeight={700} color="success.main">
+                    <Box sx={{ display: 'flex', width: '100%', gap: 2 }}>
+                       <Box sx={{ flex: 1, p: 2, bgcolor: '#f0fdf4', borderRadius: 3, border: '1px solid #dcfce7' }}>
+                          <Typography variant="h6" fontWeight={800} color="success.main">
                             {stats?.karyawan_sudah_dibayar}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">Sudah</Typography>
+                          <Typography variant="caption" fontWeight={600} color="success.dark">Sudah Dibayar</Typography>
                        </Box>
-                       <Box sx={{ borderRight: '1px solid #e2e8f0' }} />
-                       <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="h6" fontWeight={700} color="warning.main">
+                       <Box sx={{ flex: 1, p: 2, bgcolor: '#fff7ed', borderRadius: 3, border: '1px solid #ffedd5' }}>
+                          <Typography variant="h6" fontWeight={800} color="warning.main">
                             {stats?.karyawan_belum_dibayar}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">Belum</Typography>
+                          <Typography variant="caption" fontWeight={600} color="warning.dark">Belum Dibayar</Typography>
                        </Box>
                     </Box>
                 </Box>
@@ -217,43 +258,70 @@ const FinanceDashboard: React.FC = () => {
             </Card>
           </Box>
 
-          {/* History Chart Placeholder */}
+          {/* History Chart */}
           <Box sx={{ flex: 2 }}>
-            <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: '#0f172a', mb: 3 }}>
-                  Tren Pengeluaran Gaji (6 Bulan Terakhir)
-                </Typography>
-                {/* Simple Bar Chart Visualization using Box */}
-                <Box sx={{ display: 'flex', alignItems: 'flex-end', height: 250, gap: 2, pt: 2 }}>
+            <Card sx={{ borderRadius: 4, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', height: '100%', overflow: 'hidden' }}>
+              <CardContent sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ color: '#0f172a' }}>
+                      Tren Pengeluaran
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Statistik gaji 6 bulan terakhir
+                    </Typography>
+                  </Box>
+                   <Box sx={{ px: 1.5, py: 0.5, bgcolor: '#f1f5f9', borderRadius: 2 }}>
+                      <Typography variant="caption" fontWeight={600} color="text.secondary">Last 6 Months</Typography>
+                   </Box>
+                </Box>
+                
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: { xs: 1, sm: 3 }, minHeight: 250, pb: 2 }}>
                   {expenses.length > 0 ? expenses.map((exp, index) => {
-                    // Normalize height (assuming max 100jt for scale roughly)
+                    // Scaling logic
                     const maxVal = Math.max(...expenses.map(e => e.total)) || 1;
-                    const height = (exp.total / maxVal) * 80 + 20; // min 20%
+                    const heightPercent = (exp.total / maxVal) * 75 + 15; // min 15% height
+                    const isMax = exp.total === maxVal;
                     
                     return (
-                      <Box key={index} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                        <Typography variant="caption" fontWeight={600} sx={{ mb: 1, color: '#64748b' }}>
-                          {(exp.total / 1000000).toFixed(1)}jt
-                        </Typography>
+                      <Box key={index} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', group: 'true' }}>
+                        <Box sx={{ 
+                            opacity: 0, 
+                            transform: 'translateY(10px)', 
+                            transition: 'all 0.3s', 
+                            mb: 1,
+                            '.MuiBox-root:hover &': { opacity: 1, transform: 'translateY(0)' } 
+                          }}>
+                           <Typography variant="caption" fontWeight={700} sx={{ color: '#0f172a', bgcolor: 'white', px: 1, py: 0.5, borderRadius: 1, boxShadow: 2 }}>
+                             {(exp.total / 1000000).toFixed(1)}jt
+                           </Typography>
+                        </Box>
+                        
                         <Box 
                           sx={{ 
                             width: '100%', 
-                            height: `${height}%`, 
-                            bgcolor: index === 0 ? '#3b82f6' : '#94a3b8', 
-                            borderRadius: '8px 8px 0 0',
-                            transition: 'height 1s',
-                            '&:hover': { bgcolor: '#2563eb' }
+                            maxWidth: 60,
+                            height: `${heightPercent}%`, 
+                            background: isMax ? 'linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)' : '#cbd5e1', 
+                            borderRadius: '12px 12px 4px 4px',
+                            transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                            cursor: 'pointer',
+                            '&:hover': { 
+                               background: 'linear-gradient(180deg, #6366f1 0%, #4f46e5 100%)',
+                               transform: 'scaleY(1.05)',
+                               boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                            }
                           }} 
                         />
-                         <Typography variant="caption" sx={{ mt: 1, color: '#64748b' }}>
+                         <Typography variant="caption" fontWeight={600} sx={{ mt: 2, color: '#64748b' }}>
                           {new Date(exp.tahun, exp.bulan - 1).toLocaleDateString('id-ID', { month: 'short' })}
                         </Typography>
                       </Box>
                     )
                   }) : (
-                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#94a3b8' }}>
-                      Belum ada data historis
+                    <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#94a3b8', flexDirection: 'column', gap: 1 }}>
+                       <TrendingUp sx={{ fontSize: 40, opacity: 0.5 }} />
+                       <Typography variant="body2">Belum ada data historis</Typography>
                     </Box>
                   )}
                 </Box>

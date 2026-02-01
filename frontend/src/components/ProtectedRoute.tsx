@@ -11,6 +11,8 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
+  console.log('[ProtectedRoute] Check:', { path: window.location.pathname, isAuthenticated, isLoading, role: user?.peran_id, allowedRoles });
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -28,7 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
       3: '/finance/dashboard',
       4: '/employee/dashboard'
     };
-    return <Navigate to={roleRoutes[user.peran_id] || '/'} replace />;
+    return <Navigate to={roleRoutes[user.peran_id] || '/login'} replace />;
   }
 
   return <>{children}</>;

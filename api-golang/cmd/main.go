@@ -6,7 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hris-system/api-golang/internal/database"
-	"github.com/hris-system/api-golang/internal/handlers"
+	financeHandlers "github.com/hris-system/api-golang/internal/handlers/finance"
+	hrHandlers "github.com/hris-system/api-golang/internal/handlers/hr"
+	seederHandlers "github.com/hris-system/api-golang/internal/handlers/seeder"
 	"github.com/joho/godotenv"
 )
 
@@ -72,31 +74,32 @@ func main() {
 	api := router.Group("/api")
 	{
 		// Presensi endpoints
-		api.POST("/presensi/masuk", handlers.CreatePresensi)
-		api.POST("/presensi/pulang", handlers.UpdatePresensiPulang)
-		api.GET("/presensi/hari-ini", handlers.GetPresensiHariIni)
+		api.POST("/presensi/masuk", hrHandlers.CreatePresensi)
+		api.POST("/presensi/pulang", hrHandlers.UpdatePresensiPulang)
+		api.GET("/presensi/hari-ini", hrHandlers.GetPresensiHariIni)
 
 		// Cuti endpoints
-		api.POST("/cuti", handlers.CreatePengajuanCuti)
-		api.GET("/cuti", handlers.GetPengajuanCuti)
-		api.PUT("/cuti/:id/approve", handlers.ApprovePengajuanCuti)
+		api.POST("/cuti", hrHandlers.CreatePengajuanCuti)
+		api.GET("/cuti", hrHandlers.GetPengajuanCuti)
+		api.PUT("/cuti/:id/approve", hrHandlers.ApprovePengajuanCuti)
 
 		// HR Endpoints
-		api.GET("/hr/dashboard", handlers.GetHRDashboardStats)
-		api.GET("/hr/presensi", handlers.GetPresensiMonitoring)
-		api.GET("/hr/cuti", handlers.GetAllLeaveRequestsHandler)
-		api.PUT("/hr/cuti/:id/process", handlers.ProcessLeaveRequestHandler)
-		api.GET("/hr/gaji/draft", handlers.GetPayrollDraftsHandler)
-		api.POST("/hr/gaji/send", handlers.SendPayrollToFinanceHandler)
-		api.GET("/hr/gaji/history", handlers.GetPayrollHistoryHandler)
+		api.GET("/hr/dashboard", hrHandlers.GetHRDashboardStats)
+		api.GET("/hr/presensi", hrHandlers.GetPresensiMonitoring)
+		api.GET("/hr/cuti", hrHandlers.GetAllLeaveRequestsHandler)
+		api.PUT("/hr/cuti/:id/process", hrHandlers.ProcessLeaveRequestHandler)
+		api.GET("/hr/gaji/draft", hrHandlers.GetPayrollDraftsHandler)
+		api.GET("/hr/gaji/details", hrHandlers.GetPayrollDetailsHandler)
+		api.POST("/hr/gaji/send", hrHandlers.SendPayrollToFinanceHandler)
+		api.GET("/hr/gaji/history", hrHandlers.GetPayrollHistoryHandler)
 
 		// Finance Routes
-		api.GET("/finance/dashboard", handlers.GetFinanceDashboardHandler)
+		api.GET("/finance/dashboard", financeHandlers.GetFinanceDashboardHandler)
 
 		// Seeder
-		api.POST("/seed/presensi", handlers.SeedPresensiData)
-		api.POST("/seed/cuti", handlers.SeedLeaveData)
-		api.POST("/seed/gaji", handlers.SeedPayrollData)
+		api.POST("/seed/presensi", seederHandlers.SeedPresensiData)
+		api.POST("/seed/cuti", seederHandlers.SeedLeaveData)
+		api.POST("/seed/gaji", seederHandlers.SeedPayrollData)
 
 		// TODO: Add more endpoints
 		// api.GET("/penggajian", handlers.GetPenggajian)

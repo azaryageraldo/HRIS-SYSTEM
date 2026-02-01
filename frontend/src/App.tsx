@@ -1,7 +1,7 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -15,6 +15,7 @@ import MonitoringPresensi from './pages/hr/MonitoringPresensi';
 import LeaveManagement from './pages/hr/LeaveManagement';
 import PayrollDraft from './pages/hr/PayrollDraft';
 import FinanceDashboard from './pages/finance/Dashboard';
+import EmployeeDashboard from './pages/employee/Dashboard';
 
 const theme = createTheme({
   palette: {
@@ -34,6 +35,30 @@ const theme = createTheme({
   },
 });
 
+const RootRedirect = () => {
+  const { user, isLoading } = useAuth();
+  
+  console.log('[RootRedirect] State:', { user, isLoading });
+
+  if (isLoading) return null; // Wait for auth to load
+  if (!user) {
+    console.log('[RootRedirect] No user, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+
+  console.log('[RootRedirect] User role:', user.peran_id);
+
+  switch (user.peran_id) {
+    case 1: return <Navigate to="/admin/dashboard" replace />;
+    case 2: return <Navigate to="/hr/dashboard" replace />;
+    case 3: return <Navigate to="/finance/dashboard" replace />;
+    case 4: return <Navigate to="/employee/dashboard" replace />;
+    default: 
+      console.log('[RootRedirect] Unknown role, redirecting to login');
+      return <Navigate to="/login" replace />;
+  }
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -49,7 +74,7 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Navigate to="/admin/dashboard" replace />
+                  <RootRedirect />
                 </ProtectedRoute>
               }
             />
@@ -153,6 +178,16 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={[3]}>
                   <FinanceDashboard /> {/* Temporary placeholder until Payment page created */}
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Employee Routes */}
+            <Route
+              path="/employee/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={[4]}>
+                  <EmployeeDashboard />
                 </ProtectedRoute>
               }
             />

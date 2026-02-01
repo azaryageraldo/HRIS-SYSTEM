@@ -62,6 +62,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadUser();
   }, []);
 
+  console.log('[AuthProvider] Current State:', { user, isLoading, token: !!token });
+
   const login = async (username: string, password: string) => {
     try {
       const response = await apiClient.post<LoginResponse>('/auth/login', {

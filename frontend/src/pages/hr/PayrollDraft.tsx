@@ -10,7 +10,9 @@ import {
   DialogActions,
   Chip,
   Alert,
-  Snackbar
+  Snackbar,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -81,6 +83,7 @@ const PayrollDraft: React.FC = () => {
       if (result.success) {
         setOpenDialog(false);
         fetchDrafts(); // Refresh list (should be empty now)
+        fetchHistory(); // Refresh history
         setSnackbar({
           open: true,
           message: 'Draft gaji berhasil dikirim ke bagian keuangan',
@@ -101,6 +104,108 @@ const PayrollDraft: React.FC = () => {
       });
     }
   };
+
+  // --- History Feature ---
+  interface PayrollHistory {
+    bulan: number;
+    tahun: number;
+    status: string;
+    total_karyawan: number;
+    total_gaji: number;
+  }
+
+  const [tabValue, setTabValue] = useState(0);
+  const [historyData, setHistoryData] = useState<PayrollHistory[]>([]);
+  
+  const fetchHistory = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/hr/gaji/history');
+      const result = await response.json();
+      if (result.success) {
+        setHistoryData(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    }
+  };
+
+  const [openHistoryDetail, setOpenHistoryDetail] = useState(false);
+  const [historyDetailData, setHistoryDetailData] = useState<PayrollDraft[]>([]);
+
+  const handleViewHistoryDetail = async (row: PayrollHistory) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/hr/gaji/details?bulan=${row.bulan}&tahun=${row.tahun}&status=${row.status}`);
+      const result = await response.json();
+      if (result.success) {
+        setHistoryDetailData(result.data || []);
+        setOpenHistoryDetail(true);
+      }
+    } catch (error) {
+      console.error('Error fetching details:', error);
+       setSnackbar({
+        open: true,
+        message: 'Gagal mengambil detail data',
+        severity: 'error'
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (tabValue === 1) {
+      fetchHistory();
+    }
+  }, [tabValue]);
+
+  const historyColumns: GridColDef[] = [
+    { 
+      field: 'periode', 
+      headerName: 'Periode', 
+      flex: 1,
+      renderCell: (params) => {
+        const date = new Date(params.row.tahun, params.row.bulan - 1);
+        return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      }
+    },
+    { 
+      field: 'total_karyawan', 
+      headerName: 'Total Karyawan', 
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+    },
+    { 
+      field: 'total_gaji', 
+      headerName: 'Total Penggajian', 
+      flex: 1,
+      minWidth: 200,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (params) => <Typography fontWeight={700}>{formatCurrency(params.value)}</Typography>
+    },
+    { 
+      field: 'status', 
+      headerName: 'Status', 
+      width: 180, // Increased width
+      renderCell: (params) => (
+        <Chip 
+          label={params.value.replace(/_/g, ' ')} 
+          size="small" 
+          color={params.value === 'dibayar' ? 'success' : 'warning'}
+          sx={{ textTransform: 'capitalize' }} 
+        />
+      )
+    },
+    {
+      field: 'actions',
+      headerName: 'Aksi',
+      width: 100,
+      renderCell: (params) => (
+        <Button size="small" variant="text" onClick={() => handleViewHistoryDetail(params.row)}>
+          Lihat
+        </Button>
+      )
+    }
+  ];
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
@@ -130,8 +235,8 @@ const PayrollDraft: React.FC = () => {
     { 
       field: 'status', 
       headerName: 'Status', 
-      width: 120,
-      renderCell: (params) => <Chip label={params.value} size="small" variant="outlined" sx={{ textTransform: 'capitalize' }} />
+      width: 150,
+      renderCell: (params) => <Chip label={params.value ? params.value.replace(/_/g, ' ') : ''} size="small" variant="outlined" sx={{ textTransform: 'capitalize' }} />
     },
   ];
 
@@ -172,39 +277,85 @@ const PayrollDraft: React.FC = () => {
           </Box>
         </Box>
 
-        {drafts.length > 0 ? (
-          <Paper sx={{ width: '100%', mb: 3, borderRadius: 2, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
-            <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
-                 Total {drafts.length} Karyawan
-               </Typography>
-               <Typography variant="h6" fontWeight={700} color="success.main">
-                 Total: {formatCurrency(totalGaji)}
-               </Typography>
-            </Box>
-            <Box sx={{ height: 500, width: '100%' }}>
-              <DataGrid
-                rows={drafts}
-                columns={columns}
-                loading={loading}
-                initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
-                pageSizeOptions={[10, 25]}
-                disableRowSelectionOnClick
-                sx={{ border: 'none', '& .MuiDataGrid-columnHeaders': { bgcolor: '#f8fafc' } }}
-              />
-            </Box>
-          </Paper>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={tabValue} onChange={(_event: React.SyntheticEvent, newValue: number) => setTabValue(newValue)}>
+            <Tab label="Draft Gaji (Saat Ini)" />
+            <Tab label="Riwayat Penggajian" />
+          </Tabs>
+        </Box>
+
+        {tabValue === 0 ? (
+          // DRAFT VIEW
+          drafts.length > 0 ? (
+            <Paper sx={{ width: '100%', mb: 3, borderRadius: 2, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
+              <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
+                   Total {drafts.length} Karyawan
+                 </Typography>
+                 <Typography variant="h6" fontWeight={700} color="success.main">
+                   Total: {formatCurrency(totalGaji)}
+                 </Typography>
+              </Box>
+              <Box sx={{ height: 500, width: '100%' }}>
+                <DataGrid
+                  rows={drafts}
+                  columns={columns}
+                  loading={loading}
+                  initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
+                  pageSizeOptions={[10, 25]}
+                  disableRowSelectionOnClick
+                  sx={{ border: 'none', '& .MuiDataGrid-columnHeaders': { bgcolor: '#f8fafc' } }}
+                />
+              </Box>
+            </Paper>
+          ) : (
+            <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2, border: '1px dashed #cbd5e1', boxShadow: 'none' }}>
+              <MoneyIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                Tidak ada draft gaji ditemukan
+              </Typography>
+              <Typography variant="body2" color="#64748b">
+                Mungkin semua gaji sudah dikirim ke keuangan atau belum dihitung sistem.
+              </Typography>
+            </Paper>
+          )
         ) : (
-          <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2, border: '1px dashed #cbd5e1', boxShadow: 'none' }}>
-            <MoneyIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              Tidak ada draft gaji ditemukan
-            </Typography>
-            <Typography variant="body2" color="#64748b">
-              Mungkin semua gaji sudah dikirim ke keuangan atau belum dihitung sistem.
-            </Typography>
+          // HISTORY VIEW
+          <Paper sx={{ width: '100%', mb: 3, borderRadius: 2, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
+             <Box sx={{ height: 500, width: '100%' }}>
+                <DataGrid
+                  rows={historyData.map((item, index) => ({ ...item, id: index }))} // History might not have ID, use index
+                  columns={historyColumns}
+                  initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
+                  pageSizeOptions={[10, 25]}
+                  disableRowSelectionOnClick
+                  sx={{ border: 'none', '& .MuiDataGrid-columnHeaders': { bgcolor: '#f8fafc' } }}
+                />
+             </Box>
           </Paper>
         )}
+
+        {/* History Detail Dialog */}
+        <Dialog open={openHistoryDetail} onClose={() => setOpenHistoryDetail(false)} maxWidth="lg" fullWidth>
+          <DialogTitle sx={{ fontWeight: 700, borderBottom: '1px solid #e2e8f0' }}>
+            Detail Riwayat Penggajian
+          </DialogTitle>
+          <DialogContent sx={{ p: 0 }}>
+             <Box sx={{ height: 500, width: '100%' }}>
+                <DataGrid
+                  rows={historyDetailData}
+                  columns={columns.filter(c => c.field !== 'actions')} // Reuse columns but hide actions if any
+                  initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
+                  pageSizeOptions={[10, 25]}
+                  disableRowSelectionOnClick
+                  sx={{ border: 'none', '& .MuiDataGrid-columnHeaders': { bgcolor: '#f8fafc' } }}
+                />
+             </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 2, borderTop: '1px solid #e2e8f0' }}>
+            <Button onClick={() => setOpenHistoryDetail(false)} variant="outlined">Tutup</Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Confirmation Dialog */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
