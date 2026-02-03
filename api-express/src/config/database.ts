@@ -11,7 +11,8 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'db_hris',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+07:00'
 });
 
 // Test connection

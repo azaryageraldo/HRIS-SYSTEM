@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hris-system/api-golang/internal/database"
@@ -15,6 +16,13 @@ import (
 )
 
 func main() {
+	// Set global timezone to WIB
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		log.Fatal("Failed to load timezone Asia/Jakarta:", err)
+	}
+	time.Local = loc
+
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
