@@ -6,9 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hris-system/api-golang/internal/database"
+	empHandler "github.com/hris-system/api-golang/internal/handlers/employee"
 	financeHandlers "github.com/hris-system/api-golang/internal/handlers/finance"
 	hrHandlers "github.com/hris-system/api-golang/internal/handlers/hr"
 	seederHandlers "github.com/hris-system/api-golang/internal/handlers/seeder"
+	"github.com/hris-system/api-golang/internal/middleware"
 	"github.com/joho/godotenv"
 )
 
@@ -92,6 +94,13 @@ func main() {
 		api.GET("/hr/gaji/details", hrHandlers.GetPayrollDetailsHandler)
 		api.POST("/hr/gaji/send", hrHandlers.SendPayrollToFinanceHandler)
 		api.GET("/hr/gaji/history", hrHandlers.GetPayrollHistoryHandler)
+
+		// Employee Routes
+		emp := api.Group("/employee")
+		emp.Use(middleware.AuthMiddleware(), middleware.RoleMiddleware(4)) // 4 = Karyawan
+		{
+			emp.GET("/dashboard", empHandler.GetDashboardHandler)
+		}
 
 		// Finance Routes
 		financeGroup := api.Group("/finance")
