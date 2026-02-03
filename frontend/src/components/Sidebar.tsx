@@ -18,6 +18,7 @@ import {
   Dashboard,
   History as HistoryIcon,
   People,
+  Person,
   Business,
   Settings,
   AttachMoney,
@@ -130,6 +131,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
       roles: [3]
     },
     // Employee menus (role_id: 4)
+    {
+      title: 'Akun & Profil',
+      icon: <Person />,
+      path: '/employee/profile',
+      roles: [4]
+    },
     {
       title: 'Presensi Saya',
       icon: <CalendarToday />,

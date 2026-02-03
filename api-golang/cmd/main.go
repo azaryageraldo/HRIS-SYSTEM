@@ -100,6 +100,13 @@ func main() {
 		emp.Use(middleware.AuthMiddleware(), middleware.RoleMiddleware(4)) // 4 = Karyawan
 		{
 			emp.GET("/dashboard", empHandler.GetDashboardHandler)
+			emp.GET("/profile", empHandler.GetProfileHandler)
+			emp.PUT("/profile", empHandler.UpdateProfileHandler)
+
+			// Attendance Routes
+			emp.GET("/attendance", empHandler.GetCombinedAttendanceDataHandler)
+			emp.POST("/attendance/clock-in", empHandler.ClockInHandler)
+			emp.POST("/attendance/clock-out", empHandler.ClockOutHandler)
 		}
 
 		// Finance Routes

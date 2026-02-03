@@ -92,6 +92,18 @@ type SaldoCuti struct {
 	TotalHari      int       `json:"total_hari"`
 	HariTerpakai   int       `json:"hari_terpakai"`
 	SisaHari       int       `json:"sisa_hari"`
-	DibuatPada     time.Time `json:"dibuat_pada"`
 	DiperbaruiPada time.Time `json:"diperbarui_pada"`
+}
+
+// KonfigurasiPresensi represents konfigurasi_presensi table
+type KonfigurasiPresensi struct {
+	ID               int       `json:"id"`
+	JamMasukMaksimal string    `json:"jam_masuk_maksimal"`
+	JamPulangMinimal string    `json:"jam_pulang_minimal"`
+	LatitudeKantor   float64   `json:"latitude_kantor"`
+	LongitudeKantor  float64   `json:"longitude_kantor"`
+	RadiusMeter      int       `json:"radius_meter"`
+	Aktif            bool      `json:"aktif"`
+	DibuatPada       time.Time `json:"dibuat_pada"`
+	DiperbaruiPada   time.Time `json:"diperbarui_pada"`
 }
