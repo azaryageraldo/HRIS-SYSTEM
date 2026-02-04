@@ -115,6 +115,11 @@ func main() {
 			emp.GET("/attendance", empHandler.GetCombinedAttendanceDataHandler)
 			emp.POST("/attendance/clock-in", empHandler.ClockInHandler)
 			emp.POST("/attendance/clock-out", empHandler.ClockOutHandler)
+
+			// Leave Routes
+			emp.GET("/leave/balance", empHandler.GetLeaveBalanceHandler)
+			emp.POST("/leave/request", empHandler.RequestLeaveHandler)
+			emp.GET("/leave/history", empHandler.GetLeaveHistoryHandler)
 		}
 
 		// Finance Routes
