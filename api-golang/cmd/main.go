@@ -120,6 +120,10 @@ func main() {
 			emp.GET("/leave/balance", empHandler.GetLeaveBalanceHandler)
 			emp.POST("/leave/request", empHandler.RequestLeaveHandler)
 			emp.GET("/leave/history", empHandler.GetLeaveHistoryHandler)
+
+			// Salary Routes
+			emp.GET("/salary/history", empHandler.GetSalaryHistoryHandler)
+			emp.GET("/salary/:id", empHandler.GetSalaryDetailHandler)
 		}
 
 		// Finance Routes

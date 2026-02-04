@@ -22,6 +22,7 @@ import EmployeeDashboard from './pages/employee/Dashboard';
 import EmployeeProfile from './pages/employee/Profile';
 import EmployeeAttendance from './pages/employee/Attendance';
 import EmployeeLeave from './pages/employee/Leave';
+import EmployeeSalary from './pages/employee/Salary';
 
 const theme = createTheme({
   palette: {
@@ -242,6 +243,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={[4]}>
                   <EmployeeLeave />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/salary"
+              element={
+                <ProtectedRoute allowedRoles={[4]}>
+                  <EmployeeSalary />
                 </ProtectedRoute>
               }
             />
