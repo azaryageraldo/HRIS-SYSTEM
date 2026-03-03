@@ -4,88 +4,154 @@
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 ![Tech](https://img.shields.io/badge/Tech-Microservices-orange?style=for-the-badge)
 
+## Description
+
 **Sistem Manajemen Sumber Daya Manusia Terpadu Berbasis Microservices**
 
-> Dirancang khusus untuk perusahaan teknologi modern, sistem ini menghadirkan efisiensi pengelolaan karyawan melalui arsitektur microservices yang handal, pemisahan proses bisnis yang jelas, dan pengalaman pengguna yang intuitif.
+Dirancang khusus untuk perusahaan teknologi modern, sistem ini menghadirkan efisiensi pengelolaan karyawan melalui arsitektur microservices yang handal, pemisahan proses bisnis yang jelas, dan pengalaman pengguna yang intuitif. Sistem ini mencakup panel terpisah untuk Admin, HR, Keuangan, dan Karyawan, memastikan alur kerja dan privasi data yang optimal.
 
----
+## Features
 
-## 🌟 Keunggulan Sistem
+- **Multi-Panel System:**
+  - **Panel Admin:** Dashboard ringkasan data, manajemen user, konfigurasi presensi (radius & lokasi GPS), departemen, dan jabatan.
+  - **Panel HR:** Kelola persetujuan cuti/izin karyawan dan manajemen draf gaji rutin.
+  - **Panel Keuangan:** Eksekusi pembayaran gaji, kelola riwayat pembayaran bulanan, dan cetak slip pembayaran / laporan.
+  - **Panel Karyawan:** Absensi realtime berbasis GPS (Geofencing), pengajuan cuti, pembaruan profil & rekening, serta akses slip gaji digital.
+- **Microservices Architecture:** Memisahkan beban kerja Express.js untuk Panel Admin & Manajemen Config, serta Golang untuk API HR, Keuangan, dan Operasional Karyawan.
+- **Geofencing Attendance:** Karyawan wajib _clock in/out_ di dalam zona radius yang ditentukan perusahaan secara _real-time_.
+- **Automated Payroll & Deductions:** Kalkulasi gaji bersih otomatis berdasarkan kehadiran, keterlambatan, dan potongan-potongan bulanan.
 
-### 🏢 1. Panel Admin Terpusat (Express.js)
+## Tech Stack
 
-Pusat komando yang didesain dengan antarmuka **Material UI** yang elegan dan profesional.
+- **Frontend:** React, Material UI (MUI v7), Vite, Typescript
+- **Admin Service (Backend):** Express.js, Node.js, TypeScript
+- **Core Service (Backend):** Golang (Gin Framework)
+- **Database:** MySQL
+- **Tooling:** Docker (Opsional), PNPM/NPM
 
-- **Dashboard Eksekutif**: Ringkasan data karyawan dan statistik vital perusahaan dalam satu pandangan.
-- **Konfigurasi Fleksibel**:
-  - Atur **Gaji Pokok** dan **Aturan Potongan** dinamis per divisi.
-  - Kelola **Kuota Cuti** tahunan secara otomatis.
-  - Tetapkan **Radius & Lokasi Presensi** (Geofencing) untuk keamanan absensi.
-- **Manajemen User Granular**: Kontrol penuh atas akun pengguna dengan enkripsi keamanan tingkat tinggi.
+## Installation
 
-### 👥 2. Core Service Handal (Golang)
+### Persyaratan Sistem
 
-Ditenagai oleh **Golang**, mesin utama sistem ini menangani proses bisnis krusial dengan kecepatan tinggi.
+- Node.js (v18+)
+- Golang (v1.20+)
+- MySQL Server
 
-- **Presensi GPS Presisi**: Validasi lokasi karyawan secara real-time untuk memastikan kehadiran fisik di kantor.
-- **Payroll Otomatis**: Kalkulasi gaji rumit (pokok - potongan + tunjangan) diselesaikan dalam hitungan detik.
-- **Sistem Perizinan**: Alur pengajuan dan persetujuan cuti yang transparan dan tercatat rapi.
+### Langkah-langkah Installasi
 
-### 📊 3. Laporan Keuangan & Slip Gaji
+1. **Clone repositori ini:**
 
-Transparansi finansial bagi perusahaan dan karyawan.
+   ```bash
+   git clone https://github.com/azaryageraldo/HRIS-SYSTEM.git
+   cd HRIS-SYSTEM
+   ```
 
-- **Slip Gaji Digital**: Karyawan dapat mengakses detail pendapatan mereka kapan saja.
-- **Laporan Manajerial**: Data pengeluaran gaji yang terstruktur untuk analisa keuangan perusahaan.
+2. **Setup Database:**
+   - Buat database MySQL dengan nama `db_hris` (atau sesuai nama di konfigurasi `.env`).
+   - Eksekusi skrip SQL / Migration yang ada untuk membentuk tabel.
 
----
+3. **Install Dependencies & Jalankan Backend Express.js (Panel Admin):**
 
-## 🏗️ Arsitektur Sistem
+   ```bash
+   cd api-express
+   npm install
+   npm run dev
+   ```
 
-Sistem ini menerapkan pola **Microservices** untuk memastikan skalabilitas dan kemudahan pemeliharaan.
+4. **Install Dependencies & Jalankan Backend Golang (Panel Layanan Inti):**
 
-```mermaid
-graph LR
-    subgraph "Frontend Layer"
-        FE[React Admin Panel]
-        Mobile[Employee Mobile Web]
-    end
+   ```bash
+   cd api-golang
+   go mod tidy
+   go run cmd/main.go
+   ```
 
-    subgraph "API Gateway / Services"
-        AdminService[Admin Service Express.js]
-        CoreService[Core Service Golang]
-    end
+5. **Install Dependencies & Jalankan Frontend (React):**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-    subgraph "Data Persistence"
-        DB[(MySQL Database)]
-    end
+## Environment Variables
 
-    FE -->|Management & Config| AdminService
-    Mobile -->|Attendance & Request| CoreService
-    AdminService --> DB
-    CoreService --> DB
+Anda perlu membuat file `.env` di masing-masing direktori backend (`api-express` & `api-golang`) dan frontend.
+
+**Contoh `.env` untuk `api-express`:**
+
+```env
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=db_hris
+DB_PORT=3306
+JWT_SECRET=rahasia_admin_hris_anda
 ```
 
----
+**Contoh `.env` untuk `api-golang`:**
 
-## 🛠️ Stack Teknologi
+```env
+PORT=8080
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=db_hris
+DB_PORT=3306
+JWT_SECRET=rahasia_admin_hris_anda
+CORS_ORIGIN=http://localhost:3000
+```
 
-Kami menggunakan teknologi terbaik di kelasnya untuk memberikan performa maksimal.
+## API Documentation
 
-| Komponen           | Teknologi                                                                                                                                                                                                                    | Deskripsi                                        |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
-| **Frontend**       | ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![MUI](https://img.shields.io/badge/MUI-%230081CB.svg?style=flat-square&logo=mui&logoColor=white)                          | Antarmuka responsif dan modern dengan Vite       |
-| **Admin Service**  | ![Express.js](https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) | Backend manajemen yang fleksibel dan type-safe   |
-| **Core Service**   | ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white)                                                                                                                                      | Backend performa tinggi untuk proses bisnis inti |
-| **Database**       | ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=flat-square&logo=mysql&logoColor=white)                                                                                                                             | Penyimpanan data relasional yang stabil          |
-| **Infrastructure** | ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=flat-square&logo=docker&logoColor=white)                                                                                                                          | Kontainerisasi untuk deployment yang konsisten   |
+Beberapa endpoint utama dalam sistem HRIS ini:
 
----
+### Express.js (Port 5000) - Admin API
 
-<center>
+- `POST /api/auth/login`: Autentikasi Admin.
+- `GET /api/users`: Mendapatkan daftar seluruh karyawan.
+- `POST /api/attendance/config`: Setel konfigurasi jarak radius presensi.
 
-### 🚀 **HRIS System** - Modernizing Workforce Management
+### Golang (Port 8080) - Pegawai, HR, Keuangan API
 
-_Developed by HRIS Development Team_
+- `GET /api/employee/dashboard`: Melihat statistik dashboard karyawan.
+- `POST /api/employee/attendance/clock-in`: Melakukan presensi masuk (memerlukan payload Latitude/Longitude).
+- `POST /api/employee/leave/request`: Ajukan cuti/izin karyawan.
+- `GET /api/hr/leave`: Daftar ajuan izin cuti (Panel HR).
+- `POST /api/finance/pay`: Eksekusi pembayaran slip gaji ke rekening (Panel Keuangan).
 
-</center>
+_(Untuk daftar lengkap definisi API, silakan periksa implementasi handler pada direktori source code masing-masing backend.)_
+
+## Preview / Screenshot
+
+Berikut adalah cuplikan layar dari berbagai fungsionalitas di HRIS System:
+
+### 1. Halaman Login
+
+![Login](./frontend/public/asset/login.png)
+
+### 2. Panel Admin
+
+![Panel Admin](./frontend/public/asset/admin.png)
+
+### 3. Panel Karyawan
+
+![Panel Karyawan](./frontend/public/asset/karyawan.png)
+
+### 4. Panel HR (Human Resource)
+
+![Panel HR](./frontend/public/asset/hr.png)
+
+### 5. Panel Keuangan
+
+![Panel Keuangan](./frontend/public/asset/keuangan.png)
+
+## Author
+
+**Azarya Geraldo**
+
+- GitHub: [@azaryageraldo](https://github.com/azaryageraldo)
+
+## License
+
+Proyek ini menggunakan lisensi [MIT](https://opensource.org/licenses/MIT). Anda bebas untuk menggunakan, menyalin, memodifikasi, dan mendistribusikan proyek ini asalkan Anda mencantumkan pemberitahuan lisensi beserta hak cipta asli.
